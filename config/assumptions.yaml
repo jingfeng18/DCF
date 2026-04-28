@@ -1,0 +1,92 @@
+# DCF 估值模型默认假设参数
+# 适用于中国A股市场
+
+# 无风险利率 (基于10年期国债收益率)
+risk_free_rate: 0.028
+
+# 股权风险溢价 (ERP)
+equity_risk_premium: 0.065
+
+# 默认Beta (与市场整体一致)
+beta: 1.0
+
+# 债券利差 (信用风险溢价)
+debt_spread: 0.02
+
+# 短期增长率 (前5年)
+short_term_growth: 0.10
+
+# 长期增长率 (永续增长率)
+perpetual_growth_rate: 0.03
+
+# 预测年限
+projection_years: 5
+
+# 有效税率
+tax_rate: 0.25
+
+# 折旧摊销占收入比
+danda_to_revenue: 0.05
+
+# 资本性支出占收入比
+capex_to_revenue: 0.06
+
+# 营运资本增加占收入比
+wc_increase_to_revenue: 0.03
+
+# 情景分析参数
+scenarios:
+  base:
+    label: "基准情景"
+    short_term_growth: 0.10
+    perpetual_growth_rate: 0.03
+    beta: 1.0
+  bull:
+    label: "乐观情景"
+    short_term_growth: 0.15
+    perpetual_growth_rate: 0.04
+    beta: 0.9
+  bear:
+    label: "悲观情景"
+    short_term_growth: 0.05
+    perpetual_growth_rate: 0.02
+    beta: 1.1
+
+# 敏感性分析参数范围
+sensitivity:
+  wacc_range:
+    min: 0.06
+    max: 0.14
+    steps: 9
+  growth_range:
+    min: 0.01
+    max: 0.05
+    steps: 5
+
+# 蒙特卡洛模拟参数
+monte_carlo:
+  n_simulations: 5000
+  random_seed: 42
+  distributions:
+    revenue_growth:
+      type: triangular
+      min: 0.02
+      max: 0.20
+    operating_margin:
+      type: normal
+      std: 0.02
+    danda_ratio:
+      type: triangular
+      min: 0.02
+      mode: 0.05
+      max: 0.10
+    capex_ratio:
+      type: triangular
+      min: 0.02
+      mode: 0.06
+      max: 0.15
+    wc_ratio:
+      type: triangular
+      min: 0.00
+      mode: 0.03
+      max: 0.08
