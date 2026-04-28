@@ -5,8 +5,7 @@ DCF 估值报告系统 - 主入口
     python main.py --ts_code 600519.SH --token YOUR_TUSHARE_TOKEN
     python main.py --ts_code 600519.SH --token YOUR_TOKEN --format md --output report.md
 
-示例:
-    python main.py --ts_code 000858.SZ --token e91fa33c43f0ef8f82dea43708d22da5860d0f976e1ef95a991c1d8b
+
 """
 import argparse
 import os
