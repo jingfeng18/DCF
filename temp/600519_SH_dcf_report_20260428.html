@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCF 估值报告 - 贵州茅台</title>
+<style>
+  :root {
+    --primary: #1a4b8c;
+    --primary-light: #e8f0fe;
+    --success: #0f9d58;
+    --success-bg: #e6f4ea;
+    --danger: #d93025;
+    --danger-bg: #fce8e6;
+    --warning: #f9ab00;
+    --warning-bg: #fef7e0;
+    --bg: #f5f6f8;
+    --card: #fff;
+    --text: #202124;
+    --text-secondary: #5f6368;
+    --border: #e0e3e6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 24px; }
+  .container { max-width: 1060px; margin: 0 auto; }
+
+  /* ===== Header ===== */
+  .header { background: linear-gradient(135deg, #1a4b8c, #2d7bcb); color: #fff; padding: 36px 40px; border-radius: 14px; margin-bottom: 24px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .header-title h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .header-title .subtitle { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+  .rec-tag { display: inline-block; padding: 4px 20px; border-radius: 20px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px; }
+  .rec-tag.buy { background: #a8e6cf; color: #1b4332; }
+  .rec-tag.hold { background: #ffeaa7; color: #5f4b00; }
+  .rec-tag.sell { background: #ffb3b3; color: #5f1a1a; }
+
+  .header-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+  .header-item { background: rgba(255,255,255,0.12); padding: 14px 16px; border-radius: 10px; text-align: center; backdrop-filter: blur(4px); }
+  .header-item .label { font-size: 11px; opacity: 0.75; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .header-item .value { font-size: 22px; font-weight: 700; }
+  .header-item .value.upside-up { color: #b7e4c7; }
+  .header-item .value.upside-down { color: #ffb3b3; }
+  .header-item .sub-value { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+  /* ===== Cards ===== */
+  .card { background: var(--card); border-radius: 12px; padding: 28px 32px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .card-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2.5px solid var(--primary); color: var(--primary); display: flex; align-items: center; gap: 8px; }
+  .card-title .badge { font-size: 11px; font-weight: 600; background: var(--primary-light); color: var(--primary); padding: 2px 10px; border-radius: 10px; margin-left: 8px; }
+
+  /* ===== Key metric ===== */
+  .key-metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .key-metric { background: var(--bg); padding: 16px; border-radius: 10px; text-align: center; }
+  .key-metric .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .key-metric .value { font-size: 20px; font-weight: 700; }
+  .key-metric .value.highlight { color: var(--primary); }
+  .key-metric .value.winning { color: var(--success); }
+
+  /* ===== Tables ===== */
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+  th, td { padding: 10px 14px; text-align: right; border-bottom: 1px solid var(--border); }
+  th { background: #f1f3f4; font-weight: 600; color: var(--text-secondary); font-size: 13px; }
+  td:first-child, th:first-child { text-align: left; }
+  .table-caption { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  /* ===== Confidence Band ===== */
+  .conf-band-wrap { margin: 16px 0 8px; }
+  .conf-band-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+  .conf-band { position: relative; height: 32px; background: #e8eaed; border-radius: 16px; overflow: visible; margin: 4px 0 8px; }
+  .conf-band .range { position: absolute; top: 0; height: 100%; border-radius: 16px; background: linear-gradient(90deg, #85c1e9, #2d7bcb, #1a4b8c); opacity: 0.7; }
+  .conf-band .marker { position: absolute; top: -6px; width: 4px; height: 44px; background: #d93025; border-radius: 2px; z-index: 2; }
+  .conf-band .marker::after { content: "▼"; position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #d93025; }
+  .conf-band-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .conf-band-labels .mean-label { color: #d93025; font-weight: 600; }
+
+  /* ===== Distribution Bar Chart ===== */
+  .dist-chart { display: flex; align-items: flex-end; height: 160px; gap: 6px; margin: 16px 0 8px; padding: 0 4px; }
+  .dist-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+  .dist-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.2s; background: linear-gradient(180deg, #2d7bcb, #1a4b8c); }
+  .dist-bar.highlight { background: linear-gradient(180deg, #ea4335, #c62828); }
+  .dist-bar-label { font-size: 10px; color: var(--text-secondary); margin-top: 6px; white-space: nowrap; }
+
+  /* ===== Metric grid (compact) ===== */
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin: 12px 0; }
+  .metric { background: var(--bg); padding: 14px; border-radius: 8px; }
+  .metric .m-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .metric .m-value { font-size: 16px; font-weight: 600; }
+
+  /* ===== Sensitivity table with heat map ===== */
+  .sens-table { font-size: 13px; }
+  .sens-table td { min-width: 68px; text-align: center; font-weight: 500; }
+  .sens-table th { text-align: center; }
+  .cell-high { background: #e6f4ea; color: #1b5e20; }
+  .cell-mid { background: #fef7e0; color: #795500; }
+  .cell-low { background: #fce8e6; color: #8a1a1a; }
+
+  /* ===== EV composition bar ===== */
+  .ev-composition { margin: 12px 0; }
+  .ev-bar { display: flex; height: 28px; border-radius: 14px; overflow: hidden; margin: 8px 0; }
+  .ev-bar .seg-fcff { background: #2d7bcb; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 600; transition: width 0.3s; }
+  .ev-bar .seg-tv { background: #85c1e9; display: flex; align-items: center; justify-content: center; color: #1a4b8c; font-size: 11px; font-weight: 600; transition: width 0.3s; }
+  .ev-legend { display: flex; gap: 20px; font-size: 12px; color: var(--text-secondary); }
+  .ev-legend span { display: flex; align-items: center; gap: 6px; }
+  .ev-legend .dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+
+  /* ===== Print ===== */
+  @media print { body { padding: 0; background: #fff; } .header { border-radius: 0; } .card { break-inside: avoid; box-shadow: none; border: 1px solid var(--border); } }
+
+  /* ===== Scenario table ===== */
+  .scenario-table th:first-child { min-width: 100px; }
+  .scenario-bear { color: var(--danger); }
+  .scenario-bull { color: var(--success); }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    .card { padding: 20px 16px; }
+    .header { padding: 24px 20px; }
+    .header-top { flex-direction: column; gap: 12px; }
+    .header-grid { grid-template-columns: repeat(2, 1fr); }
+    .dist-chart { height: 100px; }
+    .dist-bar-label { font-size: 8px; }
+  }
+
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .tag-primary { background: var(--primary-light); color: var(--primary); }
+  .tag-success { background: var(--success-bg); color: var(--success); }
+  .tag-danger { background: var(--danger-bg); color: var(--danger); }
+
+  .info-note { font-size: 13px; color: var(--text-secondary); background: var(--bg); padding: 12px 16px; border-radius: 8px; margin: 10px 0; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ============ HEADER ============ -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">
+        <h1>DCF 估值报告</h1>
+        <div class="subtitle">贵州茅台 (600519.SH) | 报告日期: 20251231 | 方法: 蒙特卡洛模拟 (5000次)</div>
+      </div>
+      <div><span class="rec-tag sell">卖出</span></div>
+    </div>
+    <div class="header-grid">
+      <div class="header-item">
+        <div class="label">当前股价</div>
+        <div class="value">1403.20 <span style="font-size:14px;opacity:0.7;">元</span></div>
+      </div>
+      <div class="header-item">
+        <div class="label">目标股价 (MC均值)</div>
+        <div class="value" style="color:#b7e4c7;">1250.16 <span style="font-size:14px;opacity:0.7;">元</span></div>
+      </div>
+      <div class="header-item">
+        <div class="label">上涨空间</div>
+        <div class="value upside-down">-10.9%</div>
+      </div>
+      <div class="header-item">
+        <div class="label">置信区间 (P5 ~ P95)</div>
+        <div class="value" style="font-size:17px;">928.00 ~ 1636.99</div>
+      </div>
+      <div class="header-item">
+        <div class="label">上涨概率</div>
+        <div class="value">23.2%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 1. 蒙特卡洛估值分布（主结果） ============ -->
+  <div class="card">
+    <div class="card-title">一、蒙特卡洛估值分布 <span class="badge">主估值方法</span></div>
+
+    <!-- 关键统计 -->
+    <div class="key-metric-row">
+      <div class="key-metric">
+        <div class="label">目标股价（均值）</div>
+        <div class="value highlight">1250.16</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">期望价值</div>
+      </div>
+      <div class="key-metric">
+        <div class="label">中位数（P50）</div>
+        <div class="value">1230.57</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">分布中心</div>
+      </div>
+      <div class="key-metric">
+        <div class="label">标准差</div>
+        <div class="value">216.14</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">不确定性宽度</div>
+      </div>
+      <div class="key-metric">
+        <div class="label">上涨概率</div>
+        <div class="value winning">23.2%</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">P(股价 > 当前价)</div>
+      </div>
+      <div class="key-metric">
+        <div class="label">P5 / P95 区间</div>
+        <div class="value" style="font-size:17px;">928.00 ~ 1636.99</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">90% 置信区间</div>
+      </div>
+    </div>
+
+    <!-- 置信带可视化 -->
+    <div class="conf-band-wrap">
+      <div class="conf-band-label">价格分布置信带 <span style="font-weight:400;color:#999;">（红线 = 目标价 / 均值）</span></div>
+      <div class="conf-band">
+        <div class="range" style="left:17.2%;width:51.9%;"></div>
+        <div class="marker" style="left:40.8%;"></div>
+      </div>
+      <div class="conf-band-labels">
+        <span>P5: 928.00</span>
+        <span class="mean-label">均值: 1250.16</span>
+        <span>P95: 1636.99</span>
+      </div>
+    </div>
+
+    <!-- 分布直方图（CSS柱状图） -->
+    <div style="margin-top:18px;">
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">股价分布直方图</div>
+      <div class="dist-chart">
+        <div class="dist-bar-wrap"><div class="dist-bar" style="height:6px;"></div><div class="dist-bar-label">761</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:41px;"></div><div class="dist-bar-label">897</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:116px;"></div><div class="dist-bar-label">1034</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:150px;"></div><div class="dist-bar-label">1170</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:132px;"></div><div class="dist-bar-label">1307</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:85px;"></div><div class="dist-bar-label">1443</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:50px;"></div><div class="dist-bar-label">1580</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:21px;"></div><div class="dist-bar-label">1716</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:4px;"></div><div class="dist-bar-label">1853</div></div>
+<div class="dist-bar-wrap"><div class="dist-bar" style="height:4px;"></div><div class="dist-bar-label">1989</div></div>
+      </div>
+      <div class="table-caption">每根柱子代表一个价格区间，高度表示该区间模拟结果的频数</div>
+    </div>
+
+    <!-- 百分位表 -->
+    <table style="margin-top:16px;">
+      <tr>
+        <th>分位</th>
+        <th>P5</th>
+        <th>P10</th>
+        <th>P25</th>
+        <th>P50 (中位数)</th>
+        <th>P75</th>
+        <th>P90</th>
+        <th>P95</th>
+      </tr>
+      <tr>
+        <td>股价 (元)</td>
+        <td>928.00</td>
+        <td>988.19</td>
+        <td>1090.06</td>
+        <td><strong>1230.57</strong></td>
+        <td>1388.62</td>
+        <td>1551.82</td>
+        <td>1636.99</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============ 2. WACC 计算明细 ============ -->
+  <div class="card">
+    <div class="card-title">二、WACC 计算明细 <span class="badge">资本成本</span></div>
+    <table>
+      <tr><th>参数</th><th>数值</th><th>说明</th></tr>
+      <tr><td>无风险利率 (Rf)</td><td>2.80%</td><td style="font-size:12px;color:var(--text-secondary);">10 年期国债到期收益率</td></tr>
+      <tr><td>股权风险溢价 (ERP)</td><td>6.50%</td><td style="font-size:12px;color:var(--text-secondary);">股票市场相对无风险利率的超额回报</td></tr>
+      <tr><td>Beta 系数</td><td>1.00</td><td style="font-size:12px;color:var(--text-secondary);">个股相对市场整体的系统性风险</td></tr>
+      <tr><td>股权成本 (Ke = Rf + β×ERP)</td><td>9.30%</td><td style="font-size:12px;color:var(--text-secondary);">股东要求的必要回报率</td></tr>
+      <tr><td>债务成本 (Kd)</td><td>4.80%</td><td style="font-size:12px;color:var(--text-secondary);">公司借款的税前利率</td></tr>
+      <tr><td>税后债务成本 (Kd×(1-T))</td><td>3.60%</td><td style="font-size:12px;color:var(--text-secondary);">扣除利息抵税后的实际债务成本</td></tr>
+      <tr><td>债务权重 (Wd)</td><td>0.00%</td><td style="font-size:12px;color:var(--text-secondary);">债务占总资本比重</td></tr>
+      <tr><td>股权权重 (We)</td><td>100.00%</td><td style="font-size:12px;color:var(--text-secondary);">股权占总资本比重</td></tr>
+      <tr style="font-weight:700;border-top:2px solid var(--primary);"><td>WACC</td><td>9.30%</td><td style="font-size:12px;color:var(--text-secondary);">加权平均资本成本，公司整体融资成本</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ 3. 免责声明 ============ -->
+  <div class="card">
+    <div class="card-title">免责声明</div>
+    <p style="font-size:13px;color:var(--text-secondary);line-height:1.8;">
+      本报告基于公开数据和定量模型生成，仅供专业投资者参考，不构成任何投资建议或承诺。
+      估值结果依赖于一系列主观假设（包括但不限于增长率、折现率、Beta系数等），
+      实际市场表现可能与预测存在重大差异。过往表现不代表未来收益。
+      投资者应根据自身风险承受能力独立做出投资决策。
+    </p>
+  </div>
+
+  <div class="footer" style="text-align:center;color:var(--text-secondary);font-size:12px;padding:20px 0;">
+    <p>由 DCF Valuation Engine 自动生成 | 2026</p>
+  </div>
+</div>
+</body>
+</html>
