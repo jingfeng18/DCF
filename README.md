@@ -88,7 +88,7 @@ FCFF_t        = EBIT_t × (1 - 税率) + D&A_t - CapEx_t - ΔWC_t
 - **阶段 I（显式预测期）**：5 年，逐年拆解 FCFF 并贴现
 - **阶段 II（终值）**：永续增长模型，`TV = FCFF_n × (1 + g) / (WACC - g)`
 
-### WACC（CAPM）
+### WACC
 
 ```
 Ke = Rf + β × ERP
