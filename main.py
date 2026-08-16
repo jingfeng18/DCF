@@ -145,7 +145,7 @@ def main():
         model=dcf,
         base_params=base_params,
         mc_config=mc_config,
-        n_simulations=mc_config.get("n_simulations", 2000),
+        n_simulations=mc_config.get("n_simulations", 5000),
         seed=mc_config.get("random_seed", 42),
     )
     mc_result = mc_engine.run()
